@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GitHub Files2Prompt</title>
 <style>
+
 :root{
   --bg:#FAFBFC;--surface:#FFF;--text:#1F2328;--muted:#656D76;--border:#D0D7DE;
   --accent:#0969DA;--accent-bg:rgba(9,105,218,.08);--hover:#F6F8FA;
@@ -14,6 +15,7 @@
   --radius:8px;--radius-sm:6px;
   --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --mono:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;
+  --budget-green:#1A7F37;--budget-yellow:#9A6700;--budget-red:#CF222E;
 }
 [data-theme=dark]{
   --bg:#0D1117;--surface:#161B22;--text:#E6EDF3;--muted:#8B949E;--border:#30363D;
@@ -21,6 +23,7 @@
   --success:#3FB950;--success-bg:rgba(63,185,80,.1);--danger:#F85149;--danger-bg:rgba(248,81,73,.1);
   --warning:#D29922;--warning-bg:rgba(210,153,34,.1);
   --shadow:0 1px 3px rgba(0,0,0,.2);
+  --budget-green:#3FB950;--budget-yellow:#D29922;--budget-red:#F85149;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh;display:flex;flex-direction:column}
@@ -28,7 +31,6 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 button{font-family:var(--font);cursor:pointer;border:none;background:none;color:var(--text)}
 input,textarea,select{font-family:var(--font);color:var(--text)}
 
-/* Header */
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .header-left{display:flex;align-items:center;gap:10px}
 .logo{font-size:1.3rem}
@@ -38,7 +40,6 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .icon-btn{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:1rem;transition:background .15s;border:1px solid var(--border);background:var(--surface)}
 .icon-btn:hover{background:var(--hover)}
 
-/* Input bar */
 .input-bar{max-width:1200px;margin:20px auto;padding:0 20px;width:100%}
 .input-row{display:flex;gap:8px;align-items:stretch}
 .repo-input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);font-size:.9rem;outline:none;transition:border-color .15s}
@@ -53,8 +54,9 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .btn-success{background:var(--success);color:#fff;border:1px solid var(--success)}
 .btn-success:hover{opacity:.9}
 .btn-sm{padding:6px 12px;font-size:.78rem}
+.btn-danger{background:var(--danger);color:#fff;border:1px solid var(--danger)}
+.btn-danger:hover{opacity:.9}
 
-/* Controls row */
 .controls{max-width:1200px;margin:0 auto;padding:8px 20px;width:100%;display:none;flex-wrap:wrap;gap:8px;align-items:center}
 .controls.visible{display:flex}
 .branch-select{padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:.8rem;outline:none;max-width:200px}
@@ -64,18 +66,29 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .controls-right{margin-left:auto;display:flex;gap:8px;align-items:center}
 .file-count{font-size:.78rem;color:var(--muted)}
 
-/* Main layout */
+/* Token budget bar */
+.budget-bar{max-width:1200px;margin:0 auto;padding:4px 20px 8px;width:100%;display:none;gap:10px;align-items:center;flex-wrap:wrap}
+.budget-bar.visible{display:flex}
+.budget-label{font-size:.78rem;font-weight:600;white-space:nowrap}
+.budget-select{padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:.78rem;outline:none}
+.budget-track{flex:1;min-width:200px;height:8px;background:var(--border);border-radius:4px;overflow:hidden;position:relative}
+.budget-fill{height:100%;border-radius:4px;transition:width .3s ease,background .3s ease;width:0}
+.budget-fill.green{background:var(--budget-green)}
+.budget-fill.yellow{background:var(--budget-yellow)}
+.budget-fill.red{background:var(--budget-red)}
+.budget-fill.pulse{animation:budgetPulse .8s ease-in-out infinite alternate}
+@keyframes budgetPulse{from{opacity:1}to{opacity:.5}}
+.budget-text{font-size:.75rem;font-family:var(--mono);color:var(--muted);white-space:nowrap;min-width:160px;text-align:right}
+
 .main{max-width:1200px;margin:0 auto;padding:0 20px 20px;width:100%;flex:1;display:none;gap:16px}
 .main.visible{display:grid;grid-template-columns:1fr 1fr}
 @media(max-width:800px){.main.visible{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
 
-/* Tree panel */
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column}
 .panel-header{padding:10px 14px;border-bottom:1px solid var(--border);font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--hover);flex-shrink:0}
-.panel-body{overflow-y:auto;flex:1;min-height:300px;max-height:calc(100vh - 260px)}
+.panel-body{overflow-y:auto;flex:1;min-height:300px;max-height:calc(100vh - 320px)}
 .tree{padding:4px 0;font-size:.82rem}
 
-/* Tree nodes */
 .tree-node{display:flex;align-items:center;gap:4px;padding:3px 8px;cursor:pointer;transition:background .1s;user-select:none}
 .tree-node:hover{background:var(--hover)}
 .tree-node.filtered-out{display:none}
@@ -86,14 +99,41 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .tree-cb{width:15px;height:15px;accent-color:var(--accent);flex-shrink:0;cursor:pointer}
 .tree-icon{flex-shrink:0;font-size:.8rem;width:18px;text-align:center}
 .tree-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tree-tokens{font-size:.66rem;color:var(--muted);flex-shrink:0;font-family:var(--mono);margin-right:2px}
 .tree-size{font-size:.68rem;color:var(--muted);flex-shrink:0;font-family:var(--mono)}
+.tree-star{font-size:.7rem;flex-shrink:0;margin-right:1px}
 .tree-node.folder>.tree-name{font-weight:600}
 
-/* Output panel */
-.output-area{width:100%;height:100%;min-height:300px;padding:12px;border:none;background:var(--surface);color:var(--text);font-family:var(--mono);font-size:.78rem;line-height:1.6;resize:none;outline:none}
-.output-stats{padding:8px 14px;border-top:1px solid var(--border);font-size:.72rem;color:var(--muted);display:flex;gap:16px;flex-shrink:0;background:var(--hover)}
+/* Templates panel */
+.templates-section{max-width:1200px;margin:0 auto;padding:0 20px 8px;width:100%;display:none}
+.templates-section.visible{display:block}
+.templates-toggle{display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;cursor:pointer;padding:6px 0;color:var(--text);user-select:none}
+.templates-toggle:hover{color:var(--accent)}
+.templates-toggle .arrow{transition:transform .2s;font-size:.7rem}
+.templates-toggle .arrow.open{transform:rotate(90deg)}
+.templates-body{display:none;padding:8px 0}
+.templates-body.open{display:block}
+.templates-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.tpl-chip{padding:6px 12px;border:1px solid var(--border);border-radius:20px;font-size:.76rem;cursor:pointer;transition:all .15s;background:var(--surface);display:flex;align-items:center;gap:4px}
+.tpl-chip:hover{border-color:var(--accent);background:var(--accent-bg)}
+.tpl-chip.active{border-color:var(--accent);background:var(--accent-bg);color:var(--accent);font-weight:600}
+.tpl-chip .tpl-icon{font-size:.85rem}
+.custom-tpl-area{margin-top:8px;padding:10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+.custom-tpl-area label{font-size:.78rem;font-weight:600;margin-bottom:4px;display:block}
+.custom-tpl-area .hint{font-size:.7rem;color:var(--muted);margin-bottom:6px}
+.custom-tpl-input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);font-family:var(--mono);font-size:.76rem;resize:vertical;min-height:60px;outline:none;transition:border-color .15s}
+.custom-tpl-input:focus{border-color:var(--accent)}
+.custom-tpl-actions{display:flex;gap:6px;margin-top:6px;align-items:center}
+.custom-tpl-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.custom-chip{padding:4px 10px;border:1px solid var(--border);border-radius:16px;font-size:.73rem;cursor:pointer;transition:all .15s;background:var(--surface);display:flex;align-items:center;gap:4px}
+.custom-chip:hover{border-color:var(--accent)}
+.custom-chip.active{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
+.custom-chip .del-btn{font-size:.7rem;color:var(--muted);margin-left:2px;cursor:pointer}
+.custom-chip .del-btn:hover{color:var(--danger)}
 
-/* Settings modal */
+.output-area{width:100%;height:100%;min-height:300px;padding:12px;border:none;background:var(--surface);color:var(--text);font-family:var(--mono);font-size:.78rem;line-height:1.6;resize:none;outline:none}
+.output-stats{padding:8px 14px;border-top:1px solid var(--border);font-size:.72rem;color:var(--muted);display:flex;gap:16px;flex-shrink:0;background:var(--hover);flex-wrap:wrap}
+
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.visible{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:520px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.12);max-height:90vh;overflow-y:auto}
@@ -106,7 +146,6 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
 .field-group{margin-bottom:16px}
 
-/* Loading / Status */
 .status-bar{max-width:1200px;margin:0 auto;padding:0 20px;width:100%;display:none}
 .status-bar.visible{display:block}
 .status-msg{padding:10px 14px;border-radius:var(--radius);font-size:.82rem;display:flex;align-items:center;gap:8px;margin-bottom:12px}
@@ -116,20 +155,18 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* Progress bar */
 .progress-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:8px;display:none}
 .progress-bar.visible{display:block}
 .progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s ease;width:0}
 
-/* Footer */
 .footer{padding:12px 20px;border-top:1px solid var(--border);font-size:.7rem;color:var(--muted);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;background:var(--surface)}
 
-/* Empty state */
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center;max-width:1200px;margin:0 auto;width:100%}
 .empty-state.hidden{display:none}
 .empty-icon{font-size:3rem;margin-bottom:12px;opacity:.6}
 .empty-title{font-size:1.1rem;font-weight:700;margin-bottom:6px}
 .empty-desc{font-size:.85rem;color:var(--muted);max-width:400px;line-height:1.6}
+
 </style>
 </head>
 <body>
@@ -180,13 +217,52 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
     <span class="file-count" id="fileCount"></span>
     <button class="btn btn-sm btn-secondary" onclick="selectAll()">Select All</button>
     <button class="btn btn-sm btn-secondary" onclick="selectNone()">Deselect All</button>
-    <button class="btn btn-sm btn-success" id="generateBtn" onclick="generatePrompt()">📋 Generate Prompt</button>
+    <button class="btn btn-sm btn-success" id="generateBtn" onclick="generatePrompt()">📋 Generate</button>
+  </div>
+</div>
+
+<!-- Token budget bar -->
+<div class="budget-bar" id="budgetBar">
+  <span class="budget-label">🧠 Token Budget:</span>
+  <select class="budget-select" id="budgetSelect" onchange="onBudgetChange()">
+    <option value="0">No limit</option>
+    <option value="4000">4K</option>
+    <option value="8000">8K</option>
+    <option value="16000">16K</option>
+    <option value="32000" selected>32K</option>
+    <option value="64000">64K</option>
+    <option value="128000">128K</option>
+    <option value="custom">Custom…</option>
+  </select>
+  <div class="budget-track">
+    <div class="budget-fill green" id="budgetFill"></div>
+  </div>
+  <span class="budget-text" id="budgetText">0 / 32,000 tokens</span>
+</div>
+
+<!-- Templates section -->
+<div class="templates-section" id="templatesSection">
+  <div class="templates-toggle" onclick="toggleTemplates()">
+    <span class="arrow" id="tplArrow">▶</span>
+    <span>📝 Prompt Templates</span>
+  </div>
+  <div class="templates-body" id="tplBody">
+    <div class="templates-grid" id="tplGrid"></div>
+    <div class="custom-tpl-area">
+      <label>Custom Template</label>
+      <div class="hint">Use <code>{files}</code> as placeholder for selected file content.</div>
+      <textarea class="custom-tpl-input" id="customTplInput" placeholder="Analyze the following code and suggest improvements:\n\n{files}"></textarea>
+      <div class="custom-tpl-actions">
+        <button class="btn btn-sm btn-primary" onclick="saveCustomTemplate()">💾 Save Template</button>
+        <button class="btn btn-sm btn-secondary" onclick="useCustomTemplate()">▶ Use Now</button>
+      </div>
+      <div class="custom-tpl-list" id="customTplList"></div>
+    </div>
   </div>
 </div>
 
 <!-- Main panels -->
 <div class="main" id="mainPanels">
-  <!-- Tree panel -->
   <div class="panel">
     <div class="panel-header">
       <span>📁 File Tree</span>
@@ -196,7 +272,6 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
       <div class="tree" id="fileTree"></div>
     </div>
   </div>
-  <!-- Output panel -->
   <div class="panel">
     <div class="panel-header">
       <span>📄 Output</span>
@@ -205,11 +280,12 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
         <button class="btn btn-sm btn-secondary" onclick="downloadOutput()">⬇️ Download</button>
       </div>
     </div>
-    <textarea class="output-area" id="outputArea" readonly placeholder="Select files and click 'Generate Prompt' to see aggregated content here…"></textarea>
+    <textarea class="output-area" id="outputArea" readonly placeholder="Select files and click 'Generate' to see aggregated content here…"></textarea>
     <div class="output-stats" id="outputStats">
       <span id="charCount">0 chars</span>
       <span id="tokenCount">~0 tokens</span>
       <span id="fileCountOutput">0 files</span>
+      <span id="tplIndicator" style="margin-left:auto;font-style:italic"></span>
     </div>
   </div>
 </div>
@@ -246,24 +322,168 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
   <span id="rateLimitInfo">API rate limit: —</span>
 </footer>
 
-
 <script>
+
 /* ===== STATE ===== */
 let state = {
-  owner: '', repo: '', branch: '', sha: '',
-  branches: [],
-  tree: [],        // flat list from GitHub API
-  treeNodes: [],   // hierarchical
-  selected: new Set(),
-  output: ''
+  owner:'', repo:'', branch:'', sha:'',
+  branches:[], tree:[], selected: new Set(),
+  output:'', rawOutput:'', activeTemplate:null
 };
 
+/* Token estimation: ~4 chars per token */
+function estimateTokens(bytes){ return Math.ceil(bytes / 4); }
+function fmtTokens(n){
+  if(n>=1000000) return (n/1000000).toFixed(1)+'M';
+  if(n>=1000) return (n/1000).toFixed(1)+'k';
+  return String(n);
+}
+
+/* ===== IMPORTANT FILES (auto-suggest) ===== */
+const IMPORTANT_PATTERNS = [
+  /^readme/i, /^license/i, /^contributing/i,
+  /^package\.json$/i, /^pyproject\.toml$/i, /^setup\.py$/i, /^setup\.cfg$/i,
+  /^cargo\.toml$/i, /^go\.mod$/i, /^gemfile$/i, /^requirements\.txt$/i,
+  /^makefile$/i, /^dockerfile$/i, /^docker-compose/i,
+  /^\.env\.example$/i, /^tsconfig\.json$/i, /^vite\.config/i, /^webpack\.config/i,
+  /^src\/index\./i, /^src\/main\./i, /^src\/app\./i, /^app\./i, /^index\./i, /^main\./i,
+  /^lib\/index\./i, /^cmd\/main\./i,
+];
+function isImportantFile(path){
+  const name = path.split('/').pop();
+  const shortPath = path;
+  return IMPORTANT_PATTERNS.some(p => p.test(name) || p.test(shortPath));
+}
+
+/* ===== PROMPT TEMPLATES ===== */
+const BUILTIN_TEMPLATES = [
+  {id:'review', icon:'🔍', name:'Code Review', prompt:'Review the following code for bugs, performance issues, and best practices. Provide specific, actionable feedback.\n\n{files}'},
+  {id:'explain', icon:'🧠', name:'Explain Codebase', prompt:'Explain the architecture and key components of this codebase. Describe how the parts fit together and the main design decisions.\n\n{files}'},
+  {id:'bugs', icon:'🐛', name:'Find Bugs', prompt:'Identify potential bugs, security vulnerabilities, and edge cases in the following code. For each issue, explain the risk and suggest a fix.\n\n{files}'},
+  {id:'tests', icon:'🧪', name:'Write Tests', prompt:'Write comprehensive unit tests for the following code. Cover edge cases, error handling, and typical usage patterns.\n\n{files}'},
+  {id:'refactor', icon:'♻️', name:'Refactor', prompt:'Suggest refactoring improvements for cleaner, more maintainable code. Explain each suggestion and its benefits.\n\n{files}'},
+  {id:'docs', icon:'📖', name:'Documentation', prompt:'Generate clear, comprehensive documentation for the following code. Include function signatures, parameters, return values, and usage examples.\n\n{files}'},
+];
+
+let tplOpen = false;
+function toggleTemplates(){
+  tplOpen = !tplOpen;
+  document.getElementById('tplBody').classList.toggle('open', tplOpen);
+  document.getElementById('tplArrow').classList.toggle('open', tplOpen);
+}
+
+function renderTemplates(){
+  const grid = document.getElementById('tplGrid');
+  grid.innerHTML = '';
+  BUILTIN_TEMPLATES.forEach(t => {
+    const chip = document.createElement('div');
+    chip.className = 'tpl-chip' + (state.activeTemplate === t.id ? ' active' : '');
+    chip.innerHTML = `<span class="tpl-icon">${t.icon}</span>${t.name}`;
+    chip.onclick = () => selectTemplate(t.id);
+    grid.appendChild(chip);
+  });
+  // "None" chip
+  const none = document.createElement('div');
+  none.className = 'tpl-chip' + (state.activeTemplate === null ? ' active' : '');
+  none.innerHTML = '<span class="tpl-icon">📄</span>Raw Output';
+  none.onclick = () => selectTemplate(null);
+  grid.appendChild(none);
+
+  renderCustomTemplates();
+}
+
+function selectTemplate(id){
+  state.activeTemplate = id;
+  renderTemplates();
+  applyTemplate();
+}
+
+function applyTemplate(){
+  if(!state.rawOutput) return;
+  const indicator = document.getElementById('tplIndicator');
+  if(state.activeTemplate === null){
+    state.output = state.rawOutput;
+    indicator.textContent = '';
+  } else if(state.activeTemplate.startsWith('custom:')){
+    const customs = getCustomTemplates();
+    const ct = customs.find(c => c.id === state.activeTemplate);
+    if(ct){
+      state.output = ct.prompt.replace('{files}', state.rawOutput);
+      indicator.textContent = '📝 ' + ct.name;
+    }
+  } else {
+    const tpl = BUILTIN_TEMPLATES.find(t => t.id === state.activeTemplate);
+    if(tpl){
+      state.output = tpl.prompt.replace('{files}', state.rawOutput);
+      indicator.textContent = tpl.icon + ' ' + tpl.name;
+    }
+  }
+  document.getElementById('outputArea').value = state.output;
+  updateOutputStats();
+}
+
+/* Custom templates (localStorage) */
+function getCustomTemplates(){
+  try { return JSON.parse(localStorage.getItem('f2p_custom_tpls') || '[]'); } catch(e){ return []; }
+}
+function setCustomTemplates(arr){ localStorage.setItem('f2p_custom_tpls', JSON.stringify(arr)); }
+
+function saveCustomTemplate(){
+  const text = document.getElementById('customTplInput').value.trim();
+  if(!text){ showStatus('error','Enter a template with {files} placeholder first.'); return; }
+  if(!text.includes('{files}')){
+    if(!confirm('Your template does not contain {files} — the file content won\'t be included. Continue?')) return;
+  }
+  const name = prompt('Template name:', 'My Template');
+  if(!name) return;
+  const customs = getCustomTemplates();
+  const id = 'custom:' + Date.now();
+  customs.push({id, name, prompt:text});
+  setCustomTemplates(customs);
+  renderCustomTemplates();
+  showStatus('success', '💾 Template "'+name+'" saved');
+}
+
+function useCustomTemplate(){
+  const text = document.getElementById('customTplInput').value.trim();
+  if(!text) return;
+  state.activeTemplate = '__inline__';
+  // Temporarily apply
+  if(state.rawOutput){
+    state.output = text.replace('{files}', state.rawOutput);
+    document.getElementById('outputArea').value = state.output;
+    document.getElementById('tplIndicator').textContent = '📝 Custom';
+    updateOutputStats();
+  }
+  renderTemplates();
+}
+
+function renderCustomTemplates(){
+  const container = document.getElementById('customTplList');
+  container.innerHTML = '';
+  const customs = getCustomTemplates();
+  customs.forEach(ct => {
+    const chip = document.createElement('div');
+    chip.className = 'custom-chip' + (state.activeTemplate === ct.id ? ' active' : '');
+    chip.innerHTML = `<span onclick="selectTemplate('${ct.id}')">${esc(ct.name)}</span><span class="del-btn" onclick="event.stopPropagation();deleteCustomTemplate('${ct.id}')">✕</span>`;
+    container.appendChild(chip);
+  });
+}
+
+function deleteCustomTemplate(id){
+  const customs = getCustomTemplates().filter(c => c.id !== id);
+  setCustomTemplates(customs);
+  if(state.activeTemplate === id) state.activeTemplate = null;
+  renderCustomTemplates();
+  applyTemplate();
+}
+
 const DEFAULT_IGNORES = [
-  'node_modules/', '.git/', '__pycache__/', '*.pyc', '.DS_Store',
-  'dist/', '.env*', 'package-lock.json', '*.lock', '.vscode/',
-  '.idea/', '*.woff', '*.woff2', '*.ttf', '*.eot', '*.ico',
-  '*.png', '*.jpg', '*.jpeg', '*.gif', '*.svg', '*.webp',
-  '*.mp3', '*.mp4', '*.zip', '*.tar.gz', '*.pdf'
+  'node_modules/','.git/','__pycache__/','*.pyc','.DS_Store',
+  'dist/','.env*','package-lock.json','*.lock','.vscode/',
+  '.idea/','*.woff','*.woff2','*.ttf','*.eot','*.ico',
+  '*.png','*.jpg','*.jpeg','*.gif','*.svg','*.webp',
+  '*.mp3','*.mp4','*.zip','*.tar.gz','*.pdf'
 ];
 
 /* ===== SETTINGS ===== */
@@ -296,7 +516,6 @@ function apiHeaders(){
 
 async function apiFetch(url){
   const res = await fetch(url, {headers:apiHeaders()});
-  // Update rate limit display
   const rem = res.headers.get('x-ratelimit-remaining');
   const lim = res.headers.get('x-ratelimit-limit');
   if(rem!==null) document.getElementById('rateLimitInfo').textContent = `API rate limit: ${rem}/${lim} remaining`;
@@ -307,13 +526,10 @@ async function apiFetch(url){
   return res.json();
 }
 
-/* ===== PARSE REPO URL ===== */
 function parseRepoUrl(input){
   input = input.trim().replace(/\/$/,'');
-  // Full URL
   let m = input.match(/github\.com\/([^\/]+)\/([^\/]+)/);
   if(m) return {owner:m[1], repo:m[2].replace(/\.git$/,'')};
-  // owner/repo shorthand
   m = input.match(/^([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)$/);
   if(m) return {owner:m[1], repo:m[2]};
   return null;
@@ -327,30 +543,21 @@ async function loadRepo(){
     showStatus('error','Invalid repository URL. Use https://github.com/owner/repo or owner/repo');
     return;
   }
-  state.owner = parsed.owner;
-  state.repo = parsed.repo;
+  state.owner = parsed.owner; state.repo = parsed.repo;
   localStorage.setItem('gh_last_repo',input);
-
   const btn = document.getElementById('loadBtn');
   btn.disabled = true;
   document.getElementById('loadBtnText').textContent = 'Loading…';
   showStatus('info','<span class="spinner"></span> Fetching repository info…');
   hideMain();
-
   try {
-    // Get repo default branch
     const repoInfo = await apiFetch(`https://api.github.com/repos/${state.owner}/${state.repo}`);
     state.branch = repoInfo.default_branch;
-
-    // Get branches
     showStatus('info','<span class="spinner"></span> Fetching branches…');
     const branchData = await apiFetch(`https://api.github.com/repos/${state.owner}/${state.repo}/branches?per_page=100`);
     state.branches = branchData.map(b=>b.name);
     populateBranches();
-
-    // Get tree
     await loadTree();
-    
     showStatus('success',`✅ Loaded <strong>${state.owner}/${state.repo}</strong> (${state.branch}) — ${state.tree.length} items`);
     showMain();
   } catch(e){
@@ -363,19 +570,16 @@ async function loadRepo(){
 
 async function loadTree(){
   showStatus('info','<span class="spinner"></span> Fetching file tree…');
-  // Get branch SHA
   const branchInfo = await apiFetch(`https://api.github.com/repos/${state.owner}/${state.repo}/branches/${encodeURIComponent(state.branch)}`);
   state.sha = branchInfo.commit.sha;
-
   const treeData = await apiFetch(`https://api.github.com/repos/${state.owner}/${state.repo}/git/trees/${state.sha}?recursive=1`);
-  
-  if(treeData.truncated){
-    showStatus('warning','⚠️ Repository tree was truncated (very large repo). Some files may be missing.');
-  }
-  
+  if(treeData.truncated) showStatus('warning','⚠️ Repository tree was truncated.');
   state.tree = treeData.tree || [];
   state.selected.clear();
+  state.rawOutput = ''; state.output = '';
+  document.getElementById('outputArea').value = '';
   buildTreeUI();
+  updateBudgetBar();
 }
 
 async function switchBranch(branch){
@@ -385,11 +589,8 @@ async function switchBranch(branch){
   try {
     await loadTree();
     showStatus('success',`✅ Switched to <strong>${branch}</strong> — ${state.tree.length} items`);
-  } catch(e){
-    showStatus('error','❌ '+e.message);
-  } finally {
-    btn.disabled = false;
-  }
+  } catch(e){ showStatus('error','❌ '+e.message); }
+  finally { btn.disabled = false; }
 }
 
 /* ===== IGNORE PATTERNS ===== */
@@ -397,51 +598,47 @@ function matchesIgnore(path, ignores){
   const parts = path.split('/');
   const name = parts[parts.length-1];
   for(const pat of ignores){
-    // Directory pattern (ends with /)
     if(pat.endsWith('/')){
       const dir = pat.slice(0,-1);
       if(parts.some(p=>p===dir)) return true;
       continue;
     }
-    // Glob with * at start (e.g. *.pyc)
     if(pat.startsWith('*.')){
       const ext = pat.slice(1);
       if(name.endsWith(ext)) return true;
       continue;
     }
-    // Glob with * at end (e.g. .env*)
     if(pat.endsWith('*')){
       const prefix = pat.slice(0,-1);
       if(name.startsWith(prefix)) return true;
       continue;
     }
-    // Exact match on name
     if(name === pat) return true;
-    // Exact match on full path
     if(path === pat) return true;
   }
   return false;
 }
-
 
 /* ===== BUILD TREE UI ===== */
 function buildTreeUI(){
   const ignores = getIgnores();
   const container = document.getElementById('fileTree');
   container.innerHTML = '';
-  
-  // Filter and sort: folders first, then files, alphabetical
   const items = state.tree
     .filter(item => !matchesIgnore(item.path, ignores))
     .sort((a,b)=>{
       const aDir = a.type==='tree'?0:1, bDir = b.type==='tree'?0:1;
       if(aDir!==bDir) return aDir-bDir;
+      // Important files first among files
+      if(a.type==='blob' && b.type==='blob'){
+        const aImp = isImportantFile(a.path)?0:1;
+        const bImp = isImportantFile(b.path)?0:1;
+        if(aImp !== bImp) return aImp - bImp;
+      }
       return a.path.localeCompare(b.path);
     });
 
-  // Build hierarchical structure
   const root = {children:{}, files:[]};
-  
   items.forEach(item=>{
     const parts = item.path.split('/');
     let node = root;
@@ -449,23 +646,16 @@ function buildTreeUI(){
       if(!node.children[parts[i]]) node.children[parts[i]] = {children:{}, files:[]};
       node = node.children[parts[i]];
     }
-    if(item.type==='blob'){
-      node.files.push(item);
-    } else {
-      if(!node.children[parts[parts.length-1]]) node.children[parts[parts.length-1]] = {children:{}, files:[]};
-    }
+    if(item.type==='blob') node.files.push(item);
+    else if(!node.children[parts[parts.length-1]]) node.children[parts[parts.length-1]] = {children:{}, files:[]};
   });
 
-  // Count stats
   const fileItems = items.filter(i=>i.type==='blob');
   const totalSize = fileItems.reduce((s,i)=>s+(i.size||0),0);
-  document.getElementById('treeStats').textContent = `${fileItems.length} files · ${formatBytes(totalSize)}`;
+  document.getElementById('treeStats').textContent = `${fileItems.length} files · ${formatBytes(totalSize)} · ~${fmtTokens(estimateTokens(totalSize))} tokens`;
   updateFileCount();
-
-  // Render tree recursively
   renderNode(root, container, '', 0);
-  
-  // Collapse all at depth > 1 by default
+
   container.querySelectorAll('.tree-folder-children').forEach(el=>{
     const depth = parseInt(el.dataset.depth)||0;
     if(depth > 1){
@@ -477,7 +667,6 @@ function buildTreeUI(){
 }
 
 function renderNode(node, container, prefix, depth){
-  // Render folders first (sorted)
   const folderNames = Object.keys(node.children).sort();
   folderNames.forEach(name=>{
     const fullPath = prefix ? prefix+'/'+name : name;
@@ -495,28 +684,36 @@ function renderNode(node, container, prefix, depth){
       if(e.target.tagName!=='INPUT') toggleFolder(e, fullPath);
     });
     container.appendChild(folderEl);
-
     const childContainer = document.createElement('div');
     childContainer.className = 'tree-folder-children';
     childContainer.dataset.path = fullPath;
     childContainer.dataset.depth = depth+1;
     container.appendChild(childContainer);
-
     renderNode(node.children[name], childContainer, fullPath, depth+1);
   });
 
-  // Render files (sorted)
-  node.files.sort((a,b)=>a.path.localeCompare(b.path)).forEach(item=>{
+  // Sort files: important first
+  const sortedFiles = [...node.files].sort((a,b)=>{
+    const aI = isImportantFile(a.path)?0:1, bI = isImportantFile(b.path)?0:1;
+    if(aI !== bI) return aI - bI;
+    return a.path.localeCompare(b.path);
+  });
+
+  sortedFiles.forEach(item=>{
     const name = item.path.split('/').pop();
+    const tokens = estimateTokens(item.size||0);
+    const important = isImportantFile(item.path);
     const fileEl = document.createElement('div');
     fileEl.className = 'tree-node file';
     fileEl.dataset.path = item.path;
     fileEl.innerHTML = `
       <span class="tree-indent" style="width:${depth*16}px"></span>
       <span class="tree-toggle hidden">▶</span>
-      <input type="checkbox" class="tree-cb" data-path="${esc(item.path)}" data-type="file" data-size="${item.size||0}" onchange="onFileCheck(this)" onclick="event.stopPropagation()">
+      <input type="checkbox" class="tree-cb" data-path="${esc(item.path)}" data-type="file" data-size="${item.size||0}" data-tokens="${tokens}" onchange="onFileCheck(this)" onclick="event.stopPropagation()">
+      ${important ? '<span class="tree-star" title="Important file">⭐</span>' : ''}
       <span class="tree-icon">${fileIcon(name)}</span>
       <span class="tree-name">${esc(name)}</span>
+      <span class="tree-tokens">${fmtTokens(tokens)} tok</span>
       <span class="tree-size">${formatBytes(item.size||0)}</span>
     `;
     fileEl.addEventListener('click',(e)=>{
@@ -541,8 +738,7 @@ function fileIcon(name){
     json:'📋',yaml:'📋',yml:'📋',toml:'📋',xml:'📋',
     md:'📝',txt:'📝',rst:'📝',
     sh:'💻',bash:'💻',zsh:'💻',fish:'💻',ps1:'💻',
-    sql:'🗄️',graphql:'🗄️',
-    dockerfile:'🐳',
+    sql:'🗄️',graphql:'🗄️',dockerfile:'🐳',
   };
   if(name.toLowerCase()==='dockerfile') return '🐳';
   if(name.toLowerCase()==='makefile') return '🔧';
@@ -555,6 +751,73 @@ function formatBytes(b){
   if(b<1024*1024) return (b/1024).toFixed(1)+' KB';
   return (b/1024/1024).toFixed(1)+' MB';
 }
+
+/* ===== TOKEN BUDGET ===== */
+function getBudget(){
+  const val = document.getElementById('budgetSelect').value;
+  if(val === 'custom'){
+    const custom = prompt('Enter custom token budget:', '50000');
+    if(custom && !isNaN(parseInt(custom))){
+      const n = parseInt(custom);
+      // Add as option
+      const sel = document.getElementById('budgetSelect');
+      const opt = document.createElement('option');
+      opt.value = String(n); opt.textContent = fmtTokens(n);
+      sel.insertBefore(opt, sel.querySelector('[value=custom]'));
+      sel.value = String(n);
+      return n;
+    }
+    document.getElementById('budgetSelect').value = '32000';
+    return 32000;
+  }
+  return parseInt(val) || 0;
+}
+
+function getSelectedTokens(){
+  let total = 0;
+  state.selected.forEach(path => {
+    const item = state.tree.find(t => t.path === path);
+    if(item) total += estimateTokens(item.size || 0);
+  });
+  return total;
+}
+
+function updateBudgetBar(){
+  const budget = getBudget();
+  const used = getSelectedTokens();
+  const fill = document.getElementById('budgetFill');
+  const text = document.getElementById('budgetText');
+
+  if(budget === 0){
+    fill.style.width = '0%';
+    fill.className = 'budget-fill green';
+    text.textContent = `${used.toLocaleString()} tokens selected`;
+    return;
+  }
+
+  const pct = Math.min((used / budget) * 100, 100);
+  fill.style.width = pct + '%';
+
+  if(used > budget){
+    fill.className = 'budget-fill red pulse';
+    text.textContent = `⚠️ ${used.toLocaleString()} / ${budget.toLocaleString()} tokens (OVER!)`;
+    text.style.color = 'var(--danger)';
+  } else if(pct > 80){
+    fill.className = 'budget-fill red';
+    text.textContent = `${used.toLocaleString()} / ${budget.toLocaleString()} tokens`;
+    text.style.color = 'var(--danger)';
+  } else if(pct > 50){
+    fill.className = 'budget-fill yellow';
+    text.textContent = `${used.toLocaleString()} / ${budget.toLocaleString()} tokens`;
+    text.style.color = 'var(--warning)';
+  } else {
+    fill.className = 'budget-fill green';
+    text.textContent = `${used.toLocaleString()} / ${budget.toLocaleString()} tokens`;
+    text.style.color = 'var(--muted)';
+  }
+}
+
+function onBudgetChange(){ getBudget(); updateBudgetBar(); }
 
 /* ===== FOLDER TOGGLE ===== */
 function toggleFolder(e, path){
@@ -575,12 +838,12 @@ function onFileCheck(cb){
   else state.selected.delete(path);
   updateParentCheckboxes(path);
   updateFileCount();
+  updateBudgetBar();
 }
 
 function onFolderCheck(cb){
   const path = cb.dataset.path;
   const checked = cb.checked;
-  // Select/deselect all children
   const container = document.querySelector(`.tree-folder-children[data-path="${CSS.escape(path)}"]`);
   if(container){
     container.querySelectorAll('.tree-cb[data-type="file"]').forEach(fcb=>{
@@ -589,17 +852,16 @@ function onFolderCheck(cb){
       else state.selected.delete(fcb.dataset.path);
     });
     container.querySelectorAll('.tree-cb[data-type="folder"]').forEach(fcb=>{
-      fcb.checked = checked;
-      fcb.indeterminate = false;
+      fcb.checked = checked; fcb.indeterminate = false;
     });
   }
   updateParentCheckboxes(path);
   updateFileCount();
+  updateBudgetBar();
 }
 
 function updateParentCheckboxes(path){
   const parts = path.split('/');
-  // Walk up the tree
   for(let i=parts.length-2; i>=0; i--){
     const parentPath = parts.slice(0,i+1).join('/');
     const parentCb = document.querySelector(`.tree-cb[data-path="${CSS.escape(parentPath)}"][data-type="folder"]`);
@@ -608,16 +870,9 @@ function updateParentCheckboxes(path){
     if(!container) continue;
     const allFiles = container.querySelectorAll('.tree-cb[data-type="file"]');
     const checkedFiles = container.querySelectorAll('.tree-cb[data-type="file"]:checked');
-    if(checkedFiles.length===0){
-      parentCb.checked = false;
-      parentCb.indeterminate = false;
-    } else if(checkedFiles.length===allFiles.length){
-      parentCb.checked = true;
-      parentCb.indeterminate = false;
-    } else {
-      parentCb.checked = false;
-      parentCb.indeterminate = true;
-    }
+    if(checkedFiles.length===0){ parentCb.checked = false; parentCb.indeterminate = false; }
+    else if(checkedFiles.length===allFiles.length){ parentCb.checked = true; parentCb.indeterminate = false; }
+    else { parentCb.checked = false; parentCb.indeterminate = true; }
   }
 }
 
@@ -629,13 +884,12 @@ function updateFileCount(){
 function selectAll(){
   document.querySelectorAll('.tree-cb[data-type="file"]').forEach(cb=>{
     if(cb.closest('.filtered-out')) return;
-    cb.checked = true;
-    state.selected.add(cb.dataset.path);
+    cb.checked = true; state.selected.add(cb.dataset.path);
   });
   document.querySelectorAll('.tree-cb[data-type="folder"]').forEach(cb=>{
     cb.checked = true; cb.indeterminate = false;
   });
-  updateFileCount();
+  updateFileCount(); updateBudgetBar();
 }
 
 function selectNone(){
@@ -643,30 +897,23 @@ function selectNone(){
   document.querySelectorAll('.tree-cb').forEach(cb=>{
     cb.checked = false; cb.indeterminate = false;
   });
-  updateFileCount();
+  updateFileCount(); updateBudgetBar();
 }
-
 
 /* ===== FILTER TREE ===== */
 function filterTree(query){
   query = query.toLowerCase().trim();
   const nodes = document.querySelectorAll('.tree-node.file');
   const visibleFolders = new Set();
-  
   nodes.forEach(node=>{
     const path = node.dataset.path.toLowerCase();
     const match = !query || path.includes(query);
     node.classList.toggle('filtered-out',!match);
     if(match){
-      // Mark all parent folders as visible
       const parts = node.dataset.path.split('/');
-      for(let i=1;i<parts.length;i++){
-        visibleFolders.add(parts.slice(0,i).join('/'));
-      }
+      for(let i=1;i<parts.length;i++) visibleFolders.add(parts.slice(0,i).join('/'));
     }
   });
-
-  // Show/hide folder nodes
   document.querySelectorAll('.tree-node.folder').forEach(node=>{
     const path = node.dataset.path;
     const show = !query || visibleFolders.has(path);
@@ -674,8 +921,6 @@ function filterTree(query){
     const children = document.querySelector(`.tree-folder-children[data-path="${CSS.escape(path)}"]`);
     if(children) children.classList.toggle('filtered-out',!show);
   });
-
-  // Expand all folders when filtering
   if(query){
     document.querySelectorAll('.tree-folder-children').forEach(el=>{
       if(!el.classList.contains('filtered-out')) el.style.display='';
@@ -690,19 +935,16 @@ async function generatePrompt(){
     showStatus('error','No files selected. Check some files in the tree first.');
     return;
   }
-
   const maxSize = getMaxSize() * 1024;
   const files = Array.from(state.selected).sort();
   const total = files.length;
   let completed = 0;
-  let output = '';
   let skipped = 0;
 
   document.getElementById('generateBtn').disabled = true;
   showStatus('info',`<span class="spinner"></span> Fetching ${total} file${total>1?'s':''}…`);
   showProgress(0);
 
-  // Batch fetch with concurrency limit
   const CONCURRENCY = 6;
   const results = new Array(files.length);
   let idx = 0;
@@ -712,14 +954,10 @@ async function generatePrompt(){
       const i = idx++;
       const path = files[i];
       const item = state.tree.find(t=>t.path===path);
-      
       if(item && item.size > maxSize){
         results[i] = {path, content:null, skipped:true, reason:'exceeds size limit'};
-        completed++;
-        updateProgress(completed/total);
-        continue;
+        completed++; updateProgress(completed/total); continue;
       }
-
       try {
         const url = `https://raw.githubusercontent.com/${state.owner}/${state.repo}/${encodeURIComponent(state.branch)}/${path.split('/').map(encodeURIComponent).join('/')}`;
         const res = await fetch(url, {headers: getToken() ? {'Authorization':'Bearer '+getToken()} : {}});
@@ -729,8 +967,7 @@ async function generatePrompt(){
       } catch(e){
         results[i] = {path, content:null, skipped:true, reason:e.message};
       }
-      completed++;
-      updateProgress(completed/total);
+      completed++; updateProgress(completed/total);
     }
   }
 
@@ -738,7 +975,6 @@ async function generatePrompt(){
   for(let w=0;w<Math.min(CONCURRENCY,files.length);w++) workers.push(worker());
   await Promise.all(workers);
 
-  // Assemble output
   const parts = [];
   results.forEach(r=>{
     if(!r) return;
@@ -750,25 +986,22 @@ async function generatePrompt(){
     }
   });
 
-  output = `# Repository: ${state.owner}/${state.repo}\n# Branch: ${state.branch}\n# Files: ${total - skipped}/${total} (${skipped} skipped)\n# Generated: ${new Date().toISOString()}\n` + parts.join('');
+  state.rawOutput = `# Repository: ${state.owner}/${state.repo}\n# Branch: ${state.branch}\n# Files: ${total - skipped}/${total} (${skipped} skipped)\n# Generated: ${new Date().toISOString()}\n` + parts.join('');
 
-  state.output = output;
-  document.getElementById('outputArea').value = output;
-  
-  // Stats
-  const chars = output.length;
-  const tokens = Math.round(chars / 3.7); // rough estimate
+  applyTemplate();
+  hideProgress();
+  if(skipped>0) showStatus('success',`✅ Generated from ${total-skipped} files (${skipped} skipped)`);
+  else showStatus('success',`✅ Generated from ${total} files`);
+  document.getElementById('generateBtn').disabled = false;
+}
+
+function updateOutputStats(){
+  const text = state.output;
+  const chars = text.length;
+  const tokens = Math.round(chars / 3.7);
   document.getElementById('charCount').textContent = chars.toLocaleString()+' chars';
   document.getElementById('tokenCount').textContent = '~'+tokens.toLocaleString()+' tokens';
-  document.getElementById('fileCountOutput').textContent = (total-skipped)+' files';
-
-  hideProgress();
-  if(skipped>0){
-    showStatus('success',`✅ Generated prompt from ${total-skipped} files (${skipped} skipped) — ${formatBytes(chars)}`);
-  } else {
-    showStatus('success',`✅ Generated prompt from ${total} files — ${formatBytes(chars)}`);
-  }
-  document.getElementById('generateBtn').disabled = false;
+  document.getElementById('fileCountOutput').textContent = state.selected.size+' files';
 }
 
 /* ===== COPY & DOWNLOAD ===== */
@@ -778,10 +1011,8 @@ function copyOutput(){
   navigator.clipboard.writeText(text).then(()=>{
     showStatus('success','📋 Copied to clipboard!');
   }).catch(()=>{
-    // Fallback
     const ta = document.getElementById('outputArea');
-    ta.select();
-    document.execCommand('copy');
+    ta.select(); document.execCommand('copy');
     showStatus('success','📋 Copied to clipboard!');
   });
 }
@@ -798,7 +1029,6 @@ function downloadOutput(){
   URL.revokeObjectURL(url);
 }
 
-/* ===== BRANCH SELECTOR ===== */
 function populateBranches(){
   const sel = document.getElementById('branchSelect');
   sel.innerHTML = '';
@@ -817,16 +1047,13 @@ function openSettings(){
   document.getElementById('maxSizeInput').value = getMaxSize();
   document.getElementById('settingsModal').classList.add('visible');
 }
-function closeSettings(){
-  document.getElementById('settingsModal').classList.remove('visible');
-}
+function closeSettings(){ document.getElementById('settingsModal').classList.remove('visible'); }
 function saveSettings(){
   setToken(document.getElementById('tokenInput').value.trim());
   setIgnores(document.getElementById('ignoreInput').value.split('\n').map(l=>l.trim()).filter(Boolean));
   const ms = parseInt(document.getElementById('maxSizeInput').value)||500;
   setMaxSize(ms);
   closeSettings();
-  // Rebuild tree if loaded
   if(state.tree.length>0) buildTreeUI();
   showStatus('success','⚙️ Settings saved');
 }
@@ -843,30 +1070,28 @@ function showStatus(type, html){
     showStatus._timer = setTimeout(()=>{ bar.classList.remove('visible') }, 6000);
   }
 }
-
 function showProgress(pct){
   const bar = document.getElementById('progressBar');
   bar.classList.add('visible');
   document.getElementById('progressFill').style.width = (pct*100)+'%';
 }
-function updateProgress(pct){
-  document.getElementById('progressFill').style.width = (pct*100)+'%';
-}
-function hideProgress(){
-  document.getElementById('progressBar').classList.remove('visible');
-}
+function updateProgress(pct){ document.getElementById('progressFill').style.width = (pct*100)+'%'; }
+function hideProgress(){ document.getElementById('progressBar').classList.remove('visible'); }
 
 function showMain(){
   document.getElementById('emptyState').classList.add('hidden');
   document.getElementById('controls').classList.add('visible');
+  document.getElementById('budgetBar').classList.add('visible');
+  document.getElementById('templatesSection').classList.add('visible');
   document.getElementById('mainPanels').classList.add('visible');
 }
 function hideMain(){
   document.getElementById('controls').classList.remove('visible');
+  document.getElementById('budgetBar').classList.remove('visible');
+  document.getElementById('templatesSection').classList.remove('visible');
   document.getElementById('mainPanels').classList.remove('visible');
 }
 
-/* ===== KEYBOARD SHORTCUT ===== */
 document.getElementById('repoInput').addEventListener('keydown',(e)=>{
   if(e.key==='Enter'){ e.preventDefault(); loadRepo(); }
 });
@@ -876,8 +1101,13 @@ document.getElementById('repoInput').addEventListener('keydown',(e)=>{
   applyTheme(getTheme());
   const last = localStorage.getItem('gh_last_repo');
   if(last) document.getElementById('repoInput').value = last;
-  
-  // Auto-load if URL has repo param
+
+  // Restore budget
+  const savedBudget = localStorage.getItem('f2p_budget');
+  if(savedBudget) document.getElementById('budgetSelect').value = savedBudget;
+
+  renderTemplates();
+
   const params = new URLSearchParams(window.location.search);
   const repoParam = params.get('repo');
   if(repoParam){
@@ -885,6 +1115,12 @@ document.getElementById('repoInput').addEventListener('keydown',(e)=>{
     setTimeout(loadRepo, 100);
   }
 })();
+
+// Persist budget choice
+document.getElementById('budgetSelect').addEventListener('change', ()=>{
+  localStorage.setItem('f2p_budget', document.getElementById('budgetSelect').value);
+});
+
 </script>
 </body>
 </html>
