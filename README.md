@@ -31,7 +31,3 @@ Direct link with pre-loaded repo: `?repo=owner/repo`
 ## Built-in Ignore Patterns
 
 `node_modules/`, `.git/`, `__pycache__/`, `dist/`, `.env*`, `package-lock.json`, binary files, etc. Fully customizable in Settings.
-
----
-
-*Fait avec 🪶 par De l'Hatch-Claw*
