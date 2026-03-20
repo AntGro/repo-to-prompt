@@ -32,7 +32,7 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 button{font-family:var(--font);cursor:pointer;border:none;background:none;color:var(--text)}
 input,textarea,select{font-family:var(--font);color:var(--text)}
 
-.header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .header-left{display:flex;align-items:center;gap:10px}
 .logo{font-size:1.3rem}
 .header-title{font-size:1rem;font-weight:700}
@@ -41,7 +41,7 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .icon-btn{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:1rem;transition:background .15s;border:1px solid var(--border);background:var(--surface)}
 .icon-btn:hover{background:var(--hover)}
 
-.input-bar{max-width:1200px;margin:20px auto;padding:0 20px;width:100%}
+.input-bar{max-width:1600px;margin:20px auto;padding:0 12px;width:100%}
 .input-row{display:flex;gap:8px;align-items:stretch}
 .repo-input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);font-size:.9rem;outline:none;transition:border-color .15s}
 .repo-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
@@ -58,7 +58,7 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .btn-danger{background:var(--danger);color:#fff;border:1px solid var(--danger)}
 .btn-danger:hover{opacity:.9}
 
-.controls{max-width:1200px;margin:0 auto;padding:8px 20px;width:100%;display:none;flex-wrap:wrap;gap:8px;align-items:center}
+.controls{max-width:1600px;margin:0 auto;padding:8px 12px;width:100%;display:none;flex-wrap:wrap;gap:8px;align-items:center}
 .controls.visible{display:flex}
 .branch-select{padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:.8rem;outline:none;max-width:200px}
 .branch-select:focus{border-color:var(--accent)}
@@ -68,7 +68,7 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .file-count{font-size:.78rem;color:var(--muted)}
 
 /* Token budget bar */
-.budget-bar{max-width:1200px;margin:0 auto;padding:4px 20px 8px;width:100%;display:none;gap:10px;align-items:center;flex-wrap:wrap}
+.budget-bar{max-width:1600px;margin:0 auto;padding:4px 12px 8px;width:100%;display:none;gap:10px;align-items:center;flex-wrap:wrap}
 .budget-bar.visible{display:flex}
 .budget-label{font-size:.78rem;font-weight:600;white-space:nowrap}
 .budget-select{padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:.78rem;outline:none}
@@ -81,8 +81,8 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 @keyframes budgetPulse{from{opacity:1}to{opacity:.5}}
 .budget-text{font-size:.75rem;font-family:var(--mono);color:var(--muted);white-space:nowrap;min-width:160px;text-align:right}
 
-.main{max-width:1200px;margin:0 auto;padding:0 20px 20px;width:100%;flex:1;display:none;gap:16px}
-.main.visible{display:grid;grid-template-columns:1fr 1fr}
+.main{max-width:1600px;margin:0 auto;padding:0 12px 20px;width:100%;flex:1;display:none;gap:16px}
+.main.visible{display:grid;grid-template-columns:minmax(250px,var(--tree-max-w,400px)) 1fr}
 @media(max-width:800px){.main.visible{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
 
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column}
@@ -106,7 +106,7 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .tree-node.folder>.tree-name{font-weight:600}
 
 /* Templates panel */
-.templates-section{max-width:1200px;margin:0 auto;padding:0 20px 8px;width:100%;display:none}
+.templates-section{max-width:1600px;margin:0 auto;padding:0 12px 8px;width:100%;display:none}
 .templates-section.visible{display:block}
 .templates-toggle{display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;cursor:pointer;padding:6px 0;color:var(--text);user-select:none}
 .templates-toggle:hover{color:var(--accent)}
@@ -665,6 +665,16 @@ function buildTreeUI(){
       if(toggle) toggle.classList.remove('open');
     }
   });
+
+  // Compute max depth and set tree panel max-width
+  let maxDepth = 0;
+  container.querySelectorAll('.tree-indent').forEach(el=>{
+    const w = parseInt(el.style.width)||0;
+    const d = w/16;
+    if(d>maxDepth) maxDepth=d;
+  });
+  const treeMaxW = Math.min(500, Math.max(280, 250 + maxDepth * 20));
+  document.getElementById('mainPanels').style.setProperty('--tree-max-w', treeMaxW+'px');
 }
 
 function renderNode(node, container, prefix, depth){
