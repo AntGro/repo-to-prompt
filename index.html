@@ -182,6 +182,7 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 
 .footer{padding:12px 20px;border-top:1px solid var(--border);font-size:.7rem;color:var(--muted);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;background:var(--surface);flex-shrink:0}
 
+#localInputBar.welcome-expand{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center;max-width:1200px;margin:0 auto;width:100%;flex:1;min-height:0}
 .empty-state.hidden{display:none}
 .empty-icon{font-size:3rem;margin-bottom:12px;opacity:.6}
@@ -389,6 +390,7 @@ function setMode(mode){
   document.getElementById('tabLocal').classList.toggle('active', mode==='local');
   document.getElementById('githubInputBar').style.display = mode==='github' ? '' : 'none';
   document.getElementById('localInputBar').style.display = mode==='local' ? '' : 'none';
+  document.getElementById('localInputBar').classList.toggle('welcome-expand', mode==='local' && !localState.tree.length);
   document.getElementById('emptyState').style.display = mode==='github' && !ghState.tree.length ? '' : 'none';
   document.getElementById('branchSelect').style.display = mode==='github' ? '' : 'none';
   document.getElementById('settingsToken').style.display = mode==='github' ? '' : 'none';
@@ -723,6 +725,7 @@ async function loadFromHandle(dirHandle){
   });
 
   document.getElementById('localInputBar').querySelector('.drop-zone').style.display = 'none';
+  document.getElementById('localInputBar').classList.remove('welcome-expand');
   document.getElementById('folderNameDisplay').classList.add('visible');
   document.getElementById('folderPath').textContent = localState.folderName;
   showMain();
