@@ -42,14 +42,14 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .icon-btn:hover{background:var(--hover)}
 
 /* Mode tabs */
-.mode-tabs{display:flex;gap:0;margin:16px auto 0;max-width:1600px;padding:0 8px;width:100%;flex-shrink:0}
-.mode-tab{padding:10px 20px;font-size:.85rem;font-weight:600;border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:all .15s;color:var(--muted)}
+.mode-tabs{display:flex;gap:0;padding:0;flex-shrink:0}
+.mode-tab{padding:7px 16px;font-size:.82rem;font-weight:600;border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:all .15s;color:var(--muted)}
 .mode-tab:first-child{border-radius:var(--radius) 0 0 var(--radius)}
 .mode-tab:last-child{border-radius:0 var(--radius) var(--radius) 0;border-left:none}
 .mode-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .mode-tab:not(.active):hover{background:var(--hover);color:var(--text)}
 
-.input-bar{max-width:1600px;margin:12px auto 0;padding:0 8px;width:100%;flex-shrink:0}
+.input-bar{margin:12px auto 0;padding:0 8px;width:100%;flex-shrink:0}
 .input-row{display:flex;gap:8px;align-items:stretch}
 .repo-input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);font-size:.9rem;outline:none;transition:border-color .15s}
 .repo-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
@@ -76,11 +76,11 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .drop-zone-btn-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .browser-warning{margin-top:12px;padding:8px 12px;border-radius:var(--radius-sm);background:var(--warning-bg);color:var(--warning);font-size:.78rem;display:none}
 
-.folder-name-display{max-width:1600px;margin:0 auto;padding:0 8px 4px;width:100%;display:none;align-items:center;gap:8px;font-size:.85rem;flex-shrink:0}
+.folder-name-display{margin:0 auto;padding:0 8px 4px;width:100%;display:none;align-items:center;gap:8px;font-size:.85rem;flex-shrink:0}
 .folder-name-display.visible{display:flex}
 .folder-name-display .folder-path{font-family:var(--mono);font-weight:600;color:var(--accent);word-break:break-all}
 
-.controls{max-width:1600px;margin:0 auto;padding:8px 8px;width:100%;display:none;flex-wrap:wrap;gap:8px;align-items:center;flex-shrink:0}
+.controls{margin:0 auto;padding:8px 8px;width:100%;display:none;flex-wrap:wrap;gap:8px;align-items:center;flex-shrink:0}
 .controls.visible{display:flex}
 .branch-select{padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:.8rem;outline:none;max-width:200px}
 .branch-select:focus{border-color:var(--accent)}
@@ -89,7 +89,7 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .controls-right{margin-left:auto;display:flex;gap:8px;align-items:center}
 .file-count{font-size:.78rem;color:var(--muted)}
 
-.budget-bar{max-width:1600px;margin:0 auto;padding:4px 8px 8px;width:100%;display:none;gap:10px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+.budget-bar{margin:0 auto;padding:4px 8px 8px;width:100%;display:none;gap:10px;align-items:center;flex-wrap:wrap;flex-shrink:0}
 .budget-bar.visible{display:flex}
 .budget-label{font-size:.78rem;font-weight:600;white-space:nowrap}
 .budget-select{padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:.78rem;outline:none}
@@ -102,7 +102,7 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 @keyframes budgetPulse{from{opacity:1}to{opacity:.5}}
 .budget-text{font-size:.75rem;font-family:var(--mono);color:var(--muted);white-space:nowrap;min-width:160px;text-align:right}
 
-.main{max-width:1600px;margin:0 auto;padding:0 8px 12px;width:100%;flex:1;display:none;gap:16px;overflow:hidden;min-height:0}
+.main{margin:0 auto;padding:0 8px 12px;width:100%;flex:1;display:none;gap:16px;overflow:hidden;min-height:0}
 .main.visible{display:grid;grid-template-columns:minmax(250px,var(--tree-max-w,400px)) 1fr}
 @media(max-width:800px){.main.visible{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
 
@@ -126,7 +126,7 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .tree-star{font-size:.7rem;flex-shrink:0;margin-right:1px}
 .tree-node.folder>.tree-name{font-weight:600}
 
-.templates-section{max-width:1600px;margin:0 auto;padding:0 8px 8px;width:100%;display:none;flex-shrink:0}
+.templates-section{margin:0 auto;padding:0 8px 8px;width:100%;display:none;flex-shrink:0}
 .templates-section.visible{display:block}
 .templates-toggle{display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;cursor:pointer;padding:6px 0;color:var(--text);user-select:none}
 .templates-toggle:hover{color:var(--accent)}
@@ -167,7 +167,7 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
 .field-group{margin-bottom:16px}
 
-.status-bar{max-width:1600px;margin:0 auto;padding:0 12px;width:100%;display:none;flex-shrink:0}
+.status-bar{margin:0 auto;padding:0 12px;width:100%;display:none;flex-shrink:0}
 .status-bar.visible{display:block}
 .status-msg{padding:10px 14px;border-radius:var(--radius);font-size:.82rem;display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .status-info{background:var(--accent-bg);color:var(--accent);border:1px solid rgba(9,105,218,.2)}
@@ -203,16 +203,14 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
     </div>
   </div>
   <div class="header-right">
+    <div class="mode-tabs" style="margin:0;padding:0;">
+      <div class="mode-tab active" id="tabGithub" onclick="setMode('github')">🔗 GitHub Repo</div>
+      <div class="mode-tab" id="tabLocal" onclick="setMode('local')">📁 Local Files</div>
+    </div>
     <button class="icon-btn" onclick="openSettings()" title="Settings">⚙️</button>
     <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
   </div>
 </header>
-
-<!-- Mode tabs -->
-<div class="mode-tabs">
-  <div class="mode-tab active" id="tabGithub" onclick="setMode('github')">🔗 GitHub Repo</div>
-  <div class="mode-tab" id="tabLocal" onclick="setMode('local')">📁 Local Files</div>
-</div>
 
 <!-- GitHub input bar -->
 <div class="input-bar" id="githubInputBar">
