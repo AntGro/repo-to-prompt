@@ -141,12 +141,16 @@
   <div class="panel">
     <div class="panel-header">
       <span>📄 Output</span>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn btn-sm btn-secondary" id="lineNumToggle" onclick="toggleLineNumbers()" title="Toggle line numbers">1️⃣ Lines</button>
         <button class="btn btn-sm btn-secondary" onclick="copyOutput()">📋 Copy</button>
         <button class="btn btn-sm btn-secondary" onclick="downloadOutput()">⬇️ Download</button>
       </div>
     </div>
-    <textarea class="output-area" id="outputArea" readonly placeholder="Select files and click 'Generate' to see aggregated content here…"></textarea>
+    <div class="output-wrapper" id="outputWrapper">
+      <div class="line-numbers" id="lineNumbers"></div>
+      <textarea class="output-area" id="outputArea" readonly placeholder="Select files and click 'Generate' to see aggregated content here…"></textarea>
+    </div>
     <div class="output-stats" id="outputStats">
       <span id="charCount">0 chars</span>
       <span id="tokenCount">~0 tokens</span>

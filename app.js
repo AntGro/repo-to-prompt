@@ -1,4 +1,55 @@
 
+/* ===== LINE NUMBERS ===== */
+let lineNumbersVisible = localStorage.getItem('f2p_line_numbers') === 'true';
+
+function toggleLineNumbers(){
+  lineNumbersVisible = !lineNumbersVisible;
+  localStorage.setItem('f2p_line_numbers', String(lineNumbersVisible));
+  applyLineNumbers();
+}
+
+function applyLineNumbers(){
+  const wrapper = document.getElementById('outputWrapper');
+  const gutter = document.getElementById('lineNumbers');
+  const toggle = document.getElementById('lineNumToggle');
+
+  if(lineNumbersVisible){
+    gutter.classList.add('visible');
+    wrapper.classList.add('line-numbers-active');
+    toggle.classList.add('btn-primary');
+    toggle.classList.remove('btn-secondary');
+    updateLineNumbers();
+  } else {
+    gutter.classList.remove('visible');
+    wrapper.classList.remove('line-numbers-active');
+    toggle.classList.remove('btn-primary');
+    toggle.classList.add('btn-secondary');
+  }
+}
+
+function updateLineNumbers(){
+  if(!lineNumbersVisible) return;
+  const textarea = document.getElementById('outputArea');
+  const gutter = document.getElementById('lineNumbers');
+  const text = textarea.value;
+  const lines = text.split('\n');
+  const count = lines.length;
+  const digits = String(count).length;
+  gutter.style.minWidth = Math.max(40, (digits * 8) + 24) + 'px';
+  const nums = [];
+  for(let i = 1; i <= count; i++) nums.push(String(i).padStart(digits));
+  gutter.textContent = nums.join('\n');
+  gutter.scrollTop = textarea.scrollTop;
+}
+
+document.getElementById('outputArea').addEventListener('scroll', function(){
+  if(lineNumbersVisible){
+    document.getElementById('lineNumbers').scrollTop = this.scrollTop;
+  }
+});
+
+(function initLineNumbers(){ applyLineNumbers(); })();
+
 /* ===== MODE ===== */
 let currentMode = 'github'; // 'github' | 'local'
 
@@ -137,6 +188,7 @@ function applyTemplate(){
   }
   document.getElementById('outputArea').value = st.output;
   updateOutputStats();
+  updateLineNumbers();
 }
 
 function getCustomTemplates(){
