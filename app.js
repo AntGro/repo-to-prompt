@@ -62,6 +62,7 @@ function setMode(mode){
     ? 'Browse GitHub repos · Select files · Generate prompts'
     : 'Browse local folders · Select files · Generate prompts';
   document.title = mode==='github' ? 'Repo2Prompt' : 'Files2Prompt';
+  document.getElementById('footerLabel').textContent = (mode==='github' ? 'Repo2Prompt' : 'Files2Prompt') + ' — Frontend-only, no server needed';
   document.getElementById('tabGithub').classList.toggle('active', mode==='github');
   document.getElementById('tabLocal').classList.toggle('active', mode==='local');
   document.getElementById('githubInputBar').style.display = mode==='github' ? '' : 'none';
