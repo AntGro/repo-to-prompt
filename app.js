@@ -56,6 +56,12 @@ let currentMode = 'github'; // 'github' | 'local'
 function setMode(mode){
   currentMode = mode;
   localStorage.setItem('f2p_mode', mode);
+  // Adaptive header title & subtitle
+  document.getElementById('headerTitle').textContent = mode==='github' ? 'Repo2Prompt' : 'Files2Prompt';
+  document.getElementById('headerSubtitle').textContent = mode==='github'
+    ? 'Browse GitHub repos · Select files · Generate prompts'
+    : 'Browse local folders · Select files · Generate prompts';
+  document.title = mode==='github' ? 'Repo2Prompt' : 'Files2Prompt';
   document.getElementById('tabGithub').classList.toggle('active', mode==='github');
   document.getElementById('tabLocal').classList.toggle('active', mode==='local');
   document.getElementById('githubInputBar').style.display = mode==='github' ? '' : 'none';
