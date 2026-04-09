@@ -719,10 +719,22 @@ async function generatePrompt(){
         const item=ghState.tree.find(t=>t.path===path);
         if(item&&item.size>maxSize){ results[i]={path,content:null,skipped:true,reason:'exceeds size limit'}; completed++; updateProgress(completed/total); continue; }
         try {
-          const url=`https://raw.githubusercontent.com/${ghState.owner}/${ghState.repo}/${encodeURIComponent(ghState.branch)}/${path.split('/').map(encodeURIComponent).join('/')}`;
-          const res=await fetch(url,{headers:getToken()?{'Authorization':'Bearer '+getToken()}:{}});
-          if(!res.ok) throw new Error(`HTTP ${res.status}`);
-          results[i]={path,content:await res.text(),skipped:false};
+          let content;
+          const tk=getToken();
+          if(tk){
+            // Use GitHub API (supports CORS with auth) — raw.githubusercontent.com rejects CORS preflight with auth headers
+            const apiUrl=`https://api.github.com/repos/${ghState.owner}/${ghState.repo}/contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(ghState.branch)}`;
+            const res=await fetch(apiUrl,{headers:{'Authorization':'Bearer '+tk,'Accept':'application/vnd.github.v3.raw'}});
+            if(!res.ok) throw new Error(`HTTP ${res.status}`);
+            content=await res.text();
+          } else {
+            // No token — raw.githubusercontent.com works without CORS preflight
+            const url=`https://raw.githubusercontent.com/${ghState.owner}/${ghState.repo}/${encodeURIComponent(ghState.branch)}/${path.split('/').map(encodeURIComponent).join('/')}`;
+            const res=await fetch(url);
+            if(!res.ok) throw new Error(`HTTP ${res.status}`);
+            content=await res.text();
+          }
+          results[i]={path,content,skipped:false};
         } catch(e){ results[i]={path,content:null,skipped:true,reason:e.message}; }
         completed++; updateProgress(completed/total);
       }
