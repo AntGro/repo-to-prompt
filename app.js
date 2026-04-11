@@ -778,12 +778,18 @@ async function getFileFromPath(path){
 }
 
 function updateOutputStats(){
-  const st=getState(), text=st.output;
+  const text=document.getElementById('outputArea').value;
   const chars=text.length, tokens=Math.round(chars/3.7);
   document.getElementById('charCount').textContent=chars.toLocaleString()+' chars';
   document.getElementById('tokenCount').textContent='~'+tokens.toLocaleString()+' tokens';
-  document.getElementById('fileCountOutput').textContent=st.selected.size+' files';
+  document.getElementById('fileCountOutput').textContent=getState().selected.size+' files';
 }
+
+// Keep stats in sync when user edits the output
+document.getElementById('outputArea').addEventListener('input', function(){
+  getState().output = this.value;
+  updateOutputStats();
+});
 
 /* ===== COPY & DOWNLOAD ===== */
 function copyOutput(){
