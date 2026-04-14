@@ -219,10 +219,11 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
   color:#fff;
 }
 .panel-header .btn-secondary{
-  background:oklch(1 0 0 / 0.15);color:#fff;border-color:oklch(1 0 0 / 0.25);
+  background:oklch(1 0 0 / 0.92);color:oklch(0.35 0.14 264);border-color:oklch(1 0 0 / 0.6);
+  font-weight:600;
 }
 .panel-header .btn-secondary:hover{
-  background:oklch(1 0 0 / 0.25);color:#fff;border-color:oklch(1 0 0 / 0.4);
+  background:#fff;color:oklch(0.30 0.16 264);border-color:#fff;
 }
 .panel-header span[style*="color"]{color:oklch(1 0 0 / 0.7) !important}
 .panel-body{overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:oklch(0 0 0 / 0.1) transparent}
