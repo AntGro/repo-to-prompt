@@ -159,6 +159,13 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
   transition:border-color var(--transition);
 }
 .branch-select:focus{border-color:var(--accent)}
+.ref-input{
+  padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--surface);font-size:.82rem;outline:none;max-width:240px;
+  transition:border-color var(--transition);font-family:monospace;
+}
+.ref-input:focus{border-color:var(--accent)}
+.ref-input::placeholder{font-family:var(--font);opacity:.5}
 .filter-input{
   padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
   background:var(--surface);font-size:.82rem;outline:none;

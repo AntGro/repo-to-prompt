@@ -70,6 +70,7 @@ function setMode(mode){
   document.getElementById('localInputBar').classList.toggle('welcome-expand', mode==='local' && !localState.tree.length);
   document.getElementById('emptyState').style.display = mode==='github' && !ghState.tree.length ? '' : 'none';
   document.getElementById('branchSelect').style.display = mode==='github' ? '' : 'none';
+  document.getElementById('refInput').style.display = mode==='github' ? '' : 'none';
   document.getElementById('settingsToken').style.display = mode==='github' ? '' : 'none';
   document.getElementById('settingsGitignore').style.display = mode==='local' ? '' : 'none';
   document.getElementById('rateLimitInfo').textContent = mode==='github' ? 'API rate limit: —' : '';
@@ -91,7 +92,7 @@ function setMode(mode){
 
 /* ===== STATE ===== */
 let ghState = {
-  owner:'', repo:'', branch:'', sha:'',
+  owner:'', repo:'', branch:'', sha:'', ref: null,
   branches:[], tree:[], selected: new Set(),
   output:'', rawOutput:'', activeTemplate:null
 };
@@ -309,10 +310,12 @@ async function apiFetch(url){
 
 function parseRepoUrl(input){
   input = input.trim().replace(/\/$/,'');
-  let m = input.match(/github\.com\/([^\/]+)\/([^\/]+)/);
-  if(m) return {owner:m[1], repo:m[2].replace(/\.git$/,'')};
+  // Full GitHub URL — may include /tree/<ref> or /commit/<ref>
+  let m = input.match(/github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?(?:\/(tree|commit)\/(.+))?$/);
+  if(m) return {owner:m[1], repo:m[2], ref: m[4] || null};
+  // Short form: owner/repo
   m = input.match(/^([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)$/);
-  if(m) return {owner:m[1], repo:m[2]};
+  if(m) return {owner:m[1], repo:m[2], ref: null};
   return null;
 }
 
@@ -322,6 +325,9 @@ async function loadRepo(){
   const parsed = parseRepoUrl(input);
   if(!parsed){ showStatus('error','Invalid repository URL.'); return; }
   ghState.owner = parsed.owner; ghState.repo = parsed.repo;
+  // Check for ref from URL or from the ref input field
+  const refInput = document.getElementById('refInput').value.trim();
+  const refOverride = refInput || parsed.ref || null;
   localStorage.setItem('gh_last_repo',input);
   const btn = document.getElementById('loadBtn');
   btn.disabled = true;
@@ -330,12 +336,25 @@ async function loadRepo(){
   hideMain();
   try {
     const repoInfo = await apiFetch(`https://api.github.com/repos/${ghState.owner}/${ghState.repo}`);
-    ghState.branch = repoInfo.default_branch;
-    const branchData = await apiFetch(`https://api.github.com/repos/${ghState.owner}/${ghState.repo}/branches?per_page=100`);
-    ghState.branches = branchData.map(b=>b.name);
-    populateBranches();
-    await loadTree();
-    showStatus('success',`✅ Loaded <strong>${ghState.owner}/${ghState.repo}</strong> (${ghState.branch}) — ${ghState.tree.length} items`);
+    if(refOverride){
+      // Specific ref: resolve commit, skip branch listing
+      ghState.ref = refOverride;
+      ghState.branch = refOverride;
+      ghState.branches = [refOverride];
+      populateBranches();
+      document.getElementById('refInput').value = refOverride;
+      await loadTree();
+      const shortRef = refOverride.length > 12 ? refOverride.slice(0,10)+'…' : refOverride;
+      showStatus('success',`✅ Loaded <strong>${ghState.owner}/${ghState.repo}</strong> @ <code>${shortRef}</code> — ${ghState.tree.length} items`);
+    } else {
+      ghState.ref = null;
+      ghState.branch = repoInfo.default_branch;
+      const branchData = await apiFetch(`https://api.github.com/repos/${ghState.owner}/${ghState.repo}/branches?per_page=100`);
+      ghState.branches = branchData.map(b=>b.name);
+      populateBranches();
+      await loadTree();
+      showStatus('success',`✅ Loaded <strong>${ghState.owner}/${ghState.repo}</strong> (${ghState.branch}) — ${ghState.tree.length} items`);
+    }
     showMain();
     document.getElementById('emptyState').classList.add('hidden');
   } catch(e){ showStatus('error','❌ '+e.message); }
@@ -344,8 +363,10 @@ async function loadRepo(){
 
 async function loadTree(){
   showStatus('info','<span class="spinner"></span> Fetching file tree…');
-  const branchInfo = await apiFetch(`https://api.github.com/repos/${ghState.owner}/${ghState.repo}/branches/${encodeURIComponent(ghState.branch)}`);
-  ghState.sha = branchInfo.commit.sha;
+  const ref = ghState.ref || ghState.branch;
+  // Resolve the ref to a commit SHA → tree SHA
+  const commitData = await apiFetch(`https://api.github.com/repos/${ghState.owner}/${ghState.repo}/commits/${encodeURIComponent(ref)}`);
+  ghState.sha = commitData.commit.tree.sha;
   const treeData = await apiFetch(`https://api.github.com/repos/${ghState.owner}/${ghState.repo}/git/trees/${ghState.sha}?recursive=1`);
   if(treeData.truncated) showStatus('warning','⚠️ Repository tree was truncated.');
   ghState.tree = treeData.tree || [];
@@ -358,6 +379,8 @@ async function loadTree(){
 
 async function switchBranch(branch){
   ghState.branch = branch;
+  ghState.ref = null;
+  document.getElementById('refInput').value = '';
   const btn = document.getElementById('loadBtn');
   btn.disabled = true;
   try { await loadTree(); showStatus('success',`✅ Switched to <strong>${branch}</strong>`); }
@@ -723,7 +746,8 @@ async function generatePrompt(){
           const tk=getToken();
           if(tk){
             // Use GitHub API (supports CORS with auth) — raw.githubusercontent.com rejects CORS preflight with auth headers
-            const apiUrl=`https://api.github.com/repos/${ghState.owner}/${ghState.repo}/contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(ghState.branch)}`;
+            const refParam = ghState.ref || ghState.branch;
+            const apiUrl=`https://api.github.com/repos/${ghState.owner}/${ghState.repo}/contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(refParam)}`;
             const res=await fetch(apiUrl,{headers:{'Authorization':'Bearer '+tk,'Accept':'application/vnd.github.v3.raw'}});
             if(!res.ok) throw new Error(`HTTP ${res.status}`);
             content=await res.text();
@@ -868,6 +892,7 @@ function showMain(){
   document.getElementById('templatesSection').classList.add('visible');
   document.getElementById('mainPanels').classList.add('visible');
   document.getElementById('branchSelect').style.display=currentMode==='github'?'':'none';
+  document.getElementById('refInput').style.display=currentMode==='github'?'':'none';
 }
 function hideMain(){
   document.getElementById('controls').classList.remove('visible');
@@ -877,6 +902,24 @@ function hideMain(){
 }
 
 document.getElementById('repoInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); loadRepo(); }});
+document.getElementById('refInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    e.preventDefault();
+    const ref = e.target.value.trim();
+    if(ref){
+      ghState.ref = ref;
+      ghState.branch = ref;
+      loadTree().then(()=>{
+        const shortRef = ref.length > 12 ? ref.slice(0,10)+'…' : ref;
+        showStatus('success',`✅ Pinned to <code>${shortRef}</code> — ${ghState.tree.length} items`);
+      }).catch(err => showStatus('error','❌ '+err.message));
+    } else {
+      // Cleared ref — reload with default branch
+      ghState.ref = null;
+      loadRepo();
+    }
+  }
+});
 
 /* ===== INIT ===== */
 (function init(){

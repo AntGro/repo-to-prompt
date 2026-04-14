@@ -78,6 +78,7 @@
 <!-- Controls -->
 <div class="controls" id="controls">
   <select class="branch-select" id="branchSelect" onchange="switchBranch(this.value)" style="display:none"></select>
+  <input type="text" class="ref-input" id="refInput" placeholder="commit / tag / branch SHA" spellcheck="false" style="display:none" title="Pin to a specific commit, tag, or branch. Press Enter to reload.">
   <input type="text" class="filter-input" id="filterInput" placeholder="🔍 Filter files…" oninput="filterTree(this.value)">
   <div class="controls-right">
     <span class="file-count" id="fileCount"></span>
