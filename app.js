@@ -62,7 +62,9 @@ function setMode(mode){
     ? 'Browse GitHub repos · Select files · Generate prompts'
     : 'Browse local folders · Select files · Generate prompts';
   document.title = mode==='github' ? 'Repo2Prompt' : 'Files2Prompt';
-  document.getElementById('footerLabel').textContent = (mode==='github' ? 'Repo2Prompt' : 'Files2Prompt') + ' — Frontend-only, no server needed';
+  document.getElementById('footerLabel').textContent = mode==='local'
+    ? 'Files2Prompt — Your files never leave your device'
+    : 'Repo2Prompt';
   document.getElementById('tabGithub').classList.toggle('active', mode==='github');
   document.getElementById('tabLocal').classList.toggle('active', mode==='local');
   document.getElementById('githubInputBar').style.display = mode==='github' ? '' : 'none';
@@ -593,17 +595,39 @@ function formatBytes(b){
 function getBudget(){
   const val=document.getElementById('budgetSelect').value;
   if(val==='custom'){
-    const c=prompt('Enter custom token budget:','50000');
-    if(c&&!isNaN(parseInt(c))){
-      const n=parseInt(c);
-      const sel=document.getElementById('budgetSelect');
-      const opt=document.createElement('option'); opt.value=String(n); opt.textContent=fmtTokens(n);
-      sel.insertBefore(opt, sel.querySelector('[value=custom]'));
-      sel.value=String(n); return n;
-    }
-    document.getElementById('budgetSelect').value='32000'; return 32000;
+    openBudgetModal();
+    // Revert select to previous value while modal is open
+    const prev=localStorage.getItem('f2p_budget')||'32000';
+    document.getElementById('budgetSelect').value=prev;
+    return parseInt(prev)||32000;
   }
   return parseInt(val)||0;
+}
+
+function openBudgetModal(){
+  document.getElementById('customBudgetInput').value='';
+  document.getElementById('budgetModal').classList.add('visible');
+  setTimeout(()=>document.getElementById('customBudgetInput').focus(),50);
+}
+
+function closeBudgetModal(){
+  document.getElementById('budgetModal').classList.remove('visible');
+}
+
+function applyCustomBudget(){
+  const input=document.getElementById('customBudgetInput');
+  const n=parseInt(input.value);
+  if(!n||n<1){ showStatus('error','Enter a valid token budget.'); return; }
+  const sel=document.getElementById('budgetSelect');
+  // Remove any previous custom option
+  sel.querySelectorAll('option[data-custom]').forEach(o=>o.remove());
+  const opt=document.createElement('option'); opt.value=String(n); opt.textContent=fmtTokens(n); opt.setAttribute('data-custom','1');
+  sel.insertBefore(opt, sel.querySelector('[value=custom]'));
+  sel.value=String(n);
+  localStorage.setItem('f2p_budget',String(n));
+  closeBudgetModal();
+  updateBudgetBar();
+  showStatus('success','🧠 Token budget set to '+n.toLocaleString());
 }
 
 function getSelectedTokens(){
@@ -902,6 +926,7 @@ function hideMain(){
 }
 
 document.getElementById('repoInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); loadRepo(); }});
+document.getElementById('customBudgetInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); applyCustomBudget(); }});
 document.getElementById('refInput').addEventListener('keydown',e=>{
   if(e.key==='Enter'){
     e.preventDefault();

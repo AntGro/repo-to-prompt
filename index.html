@@ -191,9 +191,32 @@
   </div>
 </div>
 
+<!-- Custom token budget modal -->
+<div class="modal-overlay" id="budgetModal" onclick="if(event.target===this)closeBudgetModal()">
+  <div class="modal modal-sm">
+    <h2>🧠 Custom Token Budget</h2>
+    <div class="field-group">
+      <label for="customBudgetInput">Enter token limit</label>
+      <div class="hint">Set the maximum number of tokens for your prompt output.</div>
+      <input type="number" id="customBudgetInput" min="1000" step="1000" placeholder="e.g. 50000" spellcheck="false">
+      <div class="budget-presets">
+        <button class="btn btn-sm btn-secondary" onclick="document.getElementById('customBudgetInput').value=50000">50K</button>
+        <button class="btn btn-sm btn-secondary" onclick="document.getElementById('customBudgetInput').value=100000">100K</button>
+        <button class="btn btn-sm btn-secondary" onclick="document.getElementById('customBudgetInput').value=200000">200K</button>
+        <button class="btn btn-sm btn-secondary" onclick="document.getElementById('customBudgetInput').value=500000">500K</button>
+        <button class="btn btn-sm btn-secondary" onclick="document.getElementById('customBudgetInput').value=1000000">1M</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeBudgetModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="applyCustomBudget()">Apply</button>
+    </div>
+  </div>
+</div>
+
 <!-- Footer -->
 <footer class="footer">
-  <span id="footerLabel">Files2Prompt — Frontend-only, no server needed</span>
+  <span id="footerLabel">Files2Prompt</span>
   <span id="rateLimitInfo"></span>
 </footer>
 

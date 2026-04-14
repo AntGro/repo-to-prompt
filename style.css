@@ -334,6 +334,15 @@ input,textarea,select{font-family:var(--font);color:var(--text)}
 .modal input:focus,.modal textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
 .modal textarea{min-height:80px;font-family:var(--mono);font-size:.77rem;resize:vertical}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.modal-sm{max-width:400px}
+.modal input[type=number]{
+  width:100%;padding:10px 12px;
+  border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--bg);font-size:.85rem;outline:none;
+  transition:border-color var(--transition),box-shadow var(--transition);
+}
+.modal input[type=number]:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
+.budget-presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .field-group{margin-bottom:16px}
 
 /* ─── Status Bar ─── */
